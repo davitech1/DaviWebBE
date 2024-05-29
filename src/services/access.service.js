@@ -1,94 +1,84 @@
 'use strict'
 
-const userModel = require('../models//user.model');
+const userModel = require('../models/user.model');
 const bcrypt = require('bcrypt');
-const crypto = require('node:crypto');
-const KeyTokenService = require('./keyToken.service');
-const { createTokenPair } = require('../auth/authUtils');
-const { getInfoData } = require('../utills');
-const { findByEmail } = require('./user.service');
+const { getInfoData } = require('../utils');
+const { findByName } = require('./user.service');
+const jwt = require('jsonwebtoken')
+const { SECRET_KEY } = require('../configs/config.JWT')
 
-const RoleShop = {
+const RoleUser = {
     USER: 'USER',
     ADMIN: 'ADMIN',
 }
 
 class AccessService {
-    static login = async ({email, password, refreshToken = null}) => {
-        
-        const foundUser = await findByEmail({email})
-        if(!foundUser) throw new BadRequestError('User not registered')
-        
-        const match = bcrypt.compare(password, foundUser.password)
-        if(!match){ 
-            return 'Authentication Error'
-        } 
-        
-        const { _id: userId} = foundUser
-        const tokens = await createTokenPair({userId, email}, publicKey, privateKey)
-        await KeyTokenService.createKeyToken({
-            refreshToken: tokens.refreshToken,
-            privateKey,
-            publicKey,
-            userId
-        })
-        return {
-            shop: getInfoData({ fields: ['_id', 'name', 'email'], obj: foundUser}),
-            tokens
+    static login = async ({ name, password }) => {
+        try {
+            const foundUser = await findByName({ name })
+            if(!foundUser) return 'User not registered'
             
-        }
-        
+            const match = bcrypt.compare(password, foundUser.password)
+            if(!match){ 
+                return 'Authentication Error'
+            } 
+            const token = jwt.sign({ idUser: foundUser._id, name }, SECRET_KEY, { expiresIn: '1h' });
+            return {
+                code: 200,
+                user: getInfoData({ fields: ['_id', 'name'], obj: foundUser}),
+                token
+                
+            }           
+        } catch (error) {
+            console.log( error.message )
+            return {
+                code: 500,
+                message: 'Internal Server'
+            }          
+        }     
+       
     }
 
-    static signUp = async ({ name, email, password}) => {
-        
-            //step 1: check email exists?
-            const holderShop = await userModel.findOne({ email}).lean();
-            if( holderShop){
-                throw new BadRequestError('Error: Shop already registered')
+    static signUp = async ({ name, password}) => {
+        try {
+            //step 1: check name exists?
+            const holderName = await userModel.findOne({ name }).lean();
+            if( holderName){
+                return 'Error: User already registered'
             }
+
+            //step 2: create new user
             const passwordHash = await bcrypt.hash(password, 10);
-            const newShop = await userModel.create({
-                name, email, password: passwordHash, roles: [RoleShop.ADMIN]
+            const newUser = await userModel.create({
+                name, password: passwordHash, roles: [RoleUser.ADMIN]
             });
-
-        if(newShop){
-        const publicKey = crypto.randomBytes(64).toString();
-        const privateKey = crypto.randomBytes(64).toString();
-            // console.log( publicKey)
-            const keyStore = await KeyTokenService.createKeyToken({
-                userId: newShop._id,
-                publicKey,
-                privateKey
-            })
-
-            console.log(`keyStore::`,keyStore)
-            
-            if( !keyStore){
+ 
+            if( newUser ){
+                const token = jwt.sign({ userId: newUser._id , name }, SECRET_KEY, { expiresIn: '1day' });
+                console.log(`Create token success::`, token)
+                // const decoded = jwt.decode(token);
+                // console.log('Decode token::', decoded);
                 return {
-                    code: 'xxxx',
-                    messsage: 'keyStore error'
-                }
-            } 
-            // create token pair
-            // const publicKeyObj = crypto.createPublicKey( publicKeyString)
-            const tokens = await createTokenPair({userId: newShop._id, email}, publicKey, privateKey)
-            console.log('Create token success::', tokens)
-            
-            return {
-                code: 201,
-                metadata: {
-                    shop: getInfoData({ fields: ['_id', 'name', 'email'], obj: newShop}),
-                    tokens
+                    code: 201,
+                    metadata: {
+                        user: getInfoData({ fields: ['_id', 'name'], obj: newUser}),
+                        token
+                    }
                 }
             }
-        }
-        return {
-            code: 200,
-            metadata: null
-        }
-            
+            return {
+                code: 200,
+                metadata: null
+            }
+        } catch (error) {
+            console.log( error.message )
+            return {
+                code: 500,
+                message: 'Internal Server'
+            }
+        }      
     }
 }
+
 
 module.exports = AccessService;

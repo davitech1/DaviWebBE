@@ -9,12 +9,8 @@ const userSchema = new Schema({
     name:{
         type: String,
         trim: true,
-        maxLength: 150,
-    },
-    email:{
-        type: String,
         required: true,
-        trim: true,
+        maxLength: 150,
     },
     password:{
         type: String,
@@ -22,7 +18,7 @@ const userSchema = new Schema({
     },
     status:{
         type: String,
-        emun: ['active', 'inactive'],
+        enum: ['active', 'inactive'],
         default: 'inactive'
     },
     roles:{
