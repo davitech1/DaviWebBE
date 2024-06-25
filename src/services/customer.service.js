@@ -19,7 +19,7 @@ const createCustomer = async (customerData) => {
         const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const customer = new Customer({
             ...customerData,
-            ip: getSystemIp(),
+            ip: clientIp,
             id_post_view: customerData.id_post_view || '1',
             view_at: currentTimeVN
         });
