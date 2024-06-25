@@ -18,6 +18,10 @@ const postVersionSchema = new Schema({
         ref: 'Admin',
         required: true
     },
+    type: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: true
@@ -40,9 +44,6 @@ const postVersionSchema = new Schema({
         type: Number,
         required: true
     }
-}, {
-    timestamps: true,
-    collection: COLLECTION_NAME
 });
 
 // Export the model

@@ -10,25 +10,13 @@ const getSystemIp = () => {
             }
         }
     }
-    return '127.0.0.1';ccc
-};
-
-const getcurrentTimeUTCP7 = () => {
-    const currentTime = new Date();
-    currentTime.setHours(currentTime.getHours() + 7);
-    const year = currentTime.getUTCFullYear();
-    const month = String(currentTime.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(currentTime.getUTCDate()).padStart(2, '0');
-    const hours = String(currentTime.getUTCHours()).padStart(2, '0');
-    const minutes = String(currentTime.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(currentTime.getUTCSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    return '127.0.0.1';
 };
 
 const createCustomer = async (customerData) => {
     try {
         const currentTimeVN = getcurrentTimeUTCP7();
+        const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const customer = new Customer({
             ...customerData,
             ip: getSystemIp(),

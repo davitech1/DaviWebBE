@@ -53,6 +53,8 @@ class PostController {
             }
             const {type,title, abstract, body,image} = latestPost;
             const postData = { type,title, abstract,body, image };
+            console.log(postData.type)
+
             return res.status(200).json(postData);
         } catch(error) {
             console.log('viewPost error: ',error.message);
