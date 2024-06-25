@@ -20,5 +20,8 @@ class AccessController {
             console.log(error)
         }
     }
+    logout = async (req, res) => {
+        return res.status(200).json({ message: 'Log out successfully' });
+    }
 }
 module.exports = new AccessController();

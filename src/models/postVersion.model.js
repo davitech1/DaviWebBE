@@ -13,31 +13,21 @@ const postVersionSchema = new Schema({
         ref: 'Post',
         required: true
     },
-    admin_id: {
-        type: Number,
-        ref: 'Admin',
-        required: true
-    },
     update_by: {
-        type: Number,
+        type: String,
         ref: 'Admin',
         required: true
-    },
-    status: {
-        type: String,
-        enum: ['active', 'inactive'],
-        default: 'active'
     },
     title: {
         type: String,
         required: true
     },
-    body: {
-        type: [
-            {
-                paragraph: { type: String, required: true }
-            }
-        ],
+    abstract: {
+        type: String
+    },
+    body:{
+        type: String,
+        required: true
     },
     image: {
         type: String
