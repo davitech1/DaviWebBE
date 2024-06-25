@@ -22,12 +22,12 @@ const postVersionSchema = new Schema({
         type: String,
         required: true
     },
-    body: {
-        type: [
-            {
-                paragraph: { type: String, required: true }
-            }
-        ],
+    abstract: {
+        type: String
+    },
+    body:{
+        type: String,
+        required: true
     },
     image: {
         type: String

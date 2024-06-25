@@ -18,14 +18,10 @@ const postSchema = new Schema({
         enum: ['active', 'inactive'],
         default: 'active'
     },
-    // created_at: {
-    //     type: Date,
-    //     default: Date.now
-    // },
-    // updated_at: {
-    //     type: Date,
-    //     default: Date.now
-    // },
+    type: {
+        type: String,
+        required:true
+    },
     version: {
         type: Number,
         required: true,

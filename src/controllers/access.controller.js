@@ -20,19 +20,8 @@ class AccessController {
             console.log(error)
         }
     }
-    static logout = async (req, res) => {
-        try {
-            const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
-            if (!token) {
-                return res.status(403).json({ message: 'Access denied. No token provided.' });
-            }
-
-            await AccessService.logout(token);
-            return res.status(204).send();
-        } catch (error) {
-            console.log('Logout error: ', error.message);
-            return res.status(500).json({ message: 'Internal Server Error' });
-        }
+    logout = async (req, res) => {
+        return res.status(200).json({ message: 'Log out successfully' });
     }
 }
 module.exports = new AccessController();

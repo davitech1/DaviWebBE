@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.post('/user/signup',accessController.signUp)
 router.post('/user/login',accessController.login)
-// router.post('/user/logout', authenticateJWT, accessController.logout);
+router.post('/user/logout',authenticateJWT,accessController.logout);
 
 module.exports = router

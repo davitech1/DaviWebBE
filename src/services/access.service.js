@@ -3,7 +3,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Admin = require('../models/admin.model');
-const RevokedToken = require('../models/revokedToken.model');
 
 require('dotenv').config();
 
@@ -75,13 +74,7 @@ class AccessService {
             };
         }
     }
-    static logout = async (token) => {
-        try {
-            await RevokedToken.create({ token });
-        } catch (error) {
-            throw new Error('Error revoking token: ' + error.message);
-        }
-    }
+    
 }
 
 module.exports = AccessService;

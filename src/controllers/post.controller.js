@@ -5,15 +5,12 @@ const PostService = require('../services/post.service');
 class PostController {
     static createPost = async (req, res) => {
         try {
-            const { title, body, image } = req.body;
-
-            const bodyArray = Array.isArray(body) ? body : [body];
-
+            const { type, title, abstract, image,body } = req.body;
             const { name } = req.user;
             if (!name) {
                 return res.status(400).json({ message: 'Admin name is required' });
             }
-            const postData = { title, body: bodyArray, image, update_by: name };
+            const postData = { type, title, abstract, image,body, update_by: name };
             const newPost = await PostService.createPost(postData);
             return res.status(201).json(newPost);        
         } catch (error) {
@@ -30,15 +27,12 @@ class PostController {
             const postId = req.params.post_id; 
             console.log(`Received postId: ${postId}`);
 
-            const { status, title, body, image } = req.body;
-
-            const bodyArray = Array.isArray(body) ? body : [body];
-
+            const { type,status, title, abstract, body,image } = req.body;
             const { name } = req.user; 
             if (!name) {
                 return res.status(400).json({ message: 'Admin name is required' });
             }
-            const updateData = { status,title, body: bodyArray, image, update_by: name };
+            const updateData = {type, status,title, abstract, image,body, update_by: name };
             const post =  await PostService.updatePost(postId, updateData);
             if (!post) {
                 return res.status(404).json({ message: 'Post not found' });
@@ -57,8 +51,8 @@ class PostController {
             if (!latestPost) {
                 return res.status(404).json({ message: 'Post not found' });
             }
-            const {status,title, body, image} = latestPost;
-            const postData = { title, body, image };
+            const {type,title, abstract, body,image} = latestPost;
+            const postData = { type,title, abstract,body, image };
             return res.status(200).json(postData);
         } catch(error) {
             console.log('viewPost error: ',error.message);

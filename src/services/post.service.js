@@ -8,7 +8,7 @@ const Admin = require('../models/admin.model');
 class PostService {
     static createPost = async (postData) => {
         try {
-            const { title, body, image, update_by } = postData;
+            const { type,title, abstract, image,body, update_by } = postData;
             const createdAt = new Date();
 
             console.log(`Checking if admin ${update_by} exists in Admin collection`);
@@ -19,26 +19,28 @@ class PostService {
             }
 
             const post = new Post({
+                type: type ,
                 status: 'active',
                 version: 1
             });
             await post.save();
-            await PostService.createPostVersion(post, update_by, title, body, image, createdAt);
+            await PostService.createPostVersion(post, update_by, title, abstract, image,body, createdAt);
             return post;
         } catch (error) {
             throw new Error('Error creating post: ' + error.message);
         }
     }
 
-    static createPostVersion = async (post, update_by, title, body, image, createdAt) => {
+    static createPostVersion = async (post, update_by, title, abstract, image,body, createdAt) => {
         try {
             const postVersionData = {
                 post_id: post.post_id, 
                 update_by: update_by, 
                 status: post.status,
                 title: title,
-                body: body.map(paragraph => ({ paragraph })),  
+                abstract: abstract,  
                 image: image,
+                body:body,
                 created_at: createdAt,
                 version: post.version
             };
@@ -57,7 +59,7 @@ class PostService {
                 throw new Error('Post not found');
             }
 
-            const { status,title, body, image, update_by } = updateData;
+            const { type,status,title, abstract, image,body, update_by } = updateData;
             const updatedAt = new Date();
             if (status && status !== post.status) {
                 post.status = status;
@@ -65,14 +67,16 @@ class PostService {
                 await post.save();
                 return post;
             }
+            post.type = type;
             post.title = title;
-            post.body = body;
+            post.abstract = abstract;
             post.image = image;
+            post.body= body;
             post.updated_at = updatedAt;
             post.version += 1;
             await post.save();
 
-            await PostService.createPostVersion(post, update_by, title, body, image, updatedAt);
+            await PostService.createPostVersion(post, update_by, title, abstract, image, body, updatedAt);
             return post;
         } catch (error) {
             throw new Error('Error updating post: ' + error.message);
