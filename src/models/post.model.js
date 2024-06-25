@@ -13,24 +13,19 @@ const postSchema = new Schema({
         type: Number,
         unique: true
     },
-    admin_id: {
-        type: Number,
-        ref: 'Admin',
-        required: true
-    },
     status: {
         type: String,
         enum: ['active', 'inactive'],
         default: 'active'
     },
-    created_at: {
-        type: Date,
-        default: Date.now
-    },
-    updated_at: {
-        type: Date,
-        default: Date.now
-    },
+    // created_at: {
+    //     type: Date,
+    //     default: Date.now
+    // },
+    // updated_at: {
+    //     type: Date,
+    //     default: Date.now
+    // },
     version: {
         type: Number,
         required: true,

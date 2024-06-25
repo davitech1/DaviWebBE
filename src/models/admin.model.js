@@ -10,10 +10,6 @@ const COLLECTION_NAME = "Users";
 
 // Declare the Schema of the Mongo model    
 const userSchema = new Schema({
-    admin_id: {
-        type: Number,
-        unique: true
-    },
     name: {
         type: String,
         trim: true,
@@ -38,8 +34,6 @@ const userSchema = new Schema({
     collection: COLLECTION_NAME
 });
 
-// Apply the auto-increment plugin to the userSchema.
-userSchema.plugin(AutoIncrement, { inc_field: 'admin_id' });
 
 //Export the model
 module.exports = mongoose.model(DOCUMENT_NAME, userSchema);

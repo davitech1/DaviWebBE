@@ -1,43 +1,38 @@
 'use strict'
 
-const userModel = require('../models/user.model');
-const bcrypt = require('bcrypt');
-const { getInfoData } = require('../utils');
-const { findByName } = require('../services/user.service'); 
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const Admin = require('../models/admin.model');
+const RevokedToken = require('../models/revokedToken.model');
+
 require('dotenv').config();
 
-const SECRET_KEY = process.env.JWT_KEY;
-
-const RoleUser = {
-    USER: 'USER',
-    ADMIN: 'ADMIN',
-}
-
 class AccessService {
-    static login = async ({ name, password }) => {
+    static async login({ name, password }) {
         try {
-            const foundUser = await findByName({ name });
-            if (!foundUser) return { code: 401, message: 'User not registered' };
+            const foundAdmin = await Admin.findOne({ name });
+            if (!foundAdmin) return { code: 401, message: 'Admin not registered' };
 
-            const match = await bcrypt.compare(password, foundUser.password);
+            const match = await bcrypt.compare(password, foundAdmin.password);
             if (!match) { 
                 return { code: 401, message: 'Authentication Error' };
             }
 
-            if (foundUser.status === 'inactive') {
-                foundUser.status = 'active';
-            }
-            await foundUser.save();
+            const token = jwt.sign(
+                { idAdmin: foundAdmin._id, name }, 
+                process.env.JWT_SECRET, 
+                { expiresIn: '1h' }
+            );
+            foundAdmin.status = 'active';
+            await foundAdmin.save();
 
-            const token = jwt.sign({ idUser: foundUser._id, name }, SECRET_KEY, { expiresIn: '1h' });
             return {
                 code: 200,
-                user: getInfoData({ fields: ['_id', 'name', 'status'], obj: foundUser }),
+                admin: { _id: foundAdmin._id, name: foundAdmin.name },
                 token
             };
         } catch (error) {
-            console.error(error.message); // Ghi lại lỗi
+            console.log(error.message);
             return {
                 code: 500,
                 message: 'Internal Server Error'
@@ -45,38 +40,46 @@ class AccessService {
         }
     }
 
-    static signUp = async ({ name, password }) => {
+    static async signUp({ name, password }) {
         try {
-            const holderName = await userModel.findOne({ name }).lean();
+            const holderName = await Admin.findOne({ name }).lean();
             if (holderName) {
-                return { code: 400, message: 'Error: User already registered' };
+                return { code: 400, message: 'Error: Admin already registered' };
             }
 
             const passwordHash = await bcrypt.hash(password, 10);
-            const newUser = await userModel.create({
-                name, password: passwordHash, roles: [RoleUser.USER]
+            const newAdmin = await Admin.create({
+                name, password: passwordHash, roles: ['ADMIN']
             });
 
-            if (newUser) {
-                const token = jwt.sign({ userId: newUser._id, name }, SECRET_KEY, { expiresIn: '1h' });
-                return {
-                    code: 201,
-                    metadata: {
-                        user: getInfoData({ fields: ['_id', 'name'], obj: newUser }),
-                        token
-                    }
-                };
-            }
+            const token = jwt.sign(
+                { idAdmin: newAdmin._id, name }, 
+                process.env.JWT_SECRET, 
+                { expiresIn: '1h' }
+            );
+            newAdmin.status = 'active';
+            await newAdmin.save();
+
             return {
-                code: 200,
-                metadata: null
+                code: 201,
+                metadata: {
+                    admin: { _id: newAdmin._id, name: newAdmin.name },
+                    token
+                }
             };
         } catch (error) {
-            console.error(error.message); // Ghi lại lỗi
+            console.log(error.message);
             return {
                 code: 500,
                 message: 'Internal Server Error'
             };
+        }
+    }
+    static logout = async (token) => {
+        try {
+            await RevokedToken.create({ token });
+        } catch (error) {
+            throw new Error('Error revoking token: ' + error.message);
         }
     }
 }
