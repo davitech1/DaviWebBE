@@ -1,7 +1,7 @@
 const Customer = require('../models/customer.model.js');
+const { networkInterfaces } = require('os');
 
 const getSystemIp = () => {
-    const { networkInterfaces } = require('os');
     const nets = networkInterfaces();
     for (const name of Object.keys(nets)) {
         for (const net of nets[name]) {
@@ -13,9 +13,9 @@ const getSystemIp = () => {
     return '127.0.0.1';
 };
 
-const createCustomer = async (customerData) => {
+const createCustomer = async (customerData, req) => {
     try {
-        const currentTimeVN = getcurrentTimeUTCP7();
+        const currentTimeVN = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
         const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const customer = new Customer({
             ...customerData,

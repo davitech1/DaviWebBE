@@ -97,6 +97,24 @@ class PostService {
             throw new Error('Error retrieving post: ' + error.message);
         }
     }
+    static getPostList = async( type) =>{
+        try {
+        console.log('Kiểm tra type của bài viết muốn được lấy:',type);
+        const activePosts = await Post.find({ status: 'active' }).lean();
+            const activePostIds = activePosts.map(post => post.post_id);
+            console.log(activePostIds)
+            const postVersions = await PostVersion.find({
+                post_id: { $in: activePostIds },
+                type: 'Education'
+            }).lean();
+            console.log(postVersions)
+
+            
+            return postVersions;
+        }catch (error) {
+            throw new Error('Error retrieving posts by type: ' + error.message);
+        }
+    }
 }
 
 module.exports = PostService;

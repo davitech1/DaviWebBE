@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const DOCUMENT_NAME = "PostVersion";
-const COLLECTION_NAME = "post_versions";
+const COLLECTION_NAME = "PostVersion";
 
 // Declare the Schema of the Mongo model
 const postVersionSchema = new Schema({
