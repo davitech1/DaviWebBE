@@ -119,6 +119,66 @@ class PostService {
             throw new Error('Error retrieving posts by type: ' + error.message);
         }
     }
+    static getList = async (filters) => {
+        try {
+            console.log('Kiểm tra điều kiện lọc của bài viết:', filters);
+
+            // Tạo truy vấn cho Post dựa trên các điều kiện lọc
+            const postQuery = {};
+
+            if (filters.status) {
+                postQuery.status = filters.status;
+            }
+
+            // Tìm tất cả các bài viết dựa trên điều kiện lọc
+            const posts = await Post.find(postQuery).lean();
+            const postIds = posts.map(post => post._id);
+
+            if (postIds.length === 0) {
+                console.log('Không có bài viết nào thỏa mãn điều kiện lọc');
+                return [];
+            }
+
+            // Tạo truy vấn cho PostVersion dựa trên các điều kiện lọc và post_id từ bài viết thỏa mãn điều kiện lọc
+            const postVersionQuery = {
+                post_id: { $in: postIds }
+            };
+
+            if (filters.type) {
+                postVersionQuery['body.type'] = filters.type;
+            }
+
+            if (filters.update_by) {
+                postVersionQuery.admin_id = filters.admin_id;
+            }
+
+            if (filters.title) {
+                postVersionQuery.title = { $regex: filters.title, $options: 'i' }; // Tìm kiếm tiêu đề không phân biệt chữ hoa chữ thường
+            }
+
+            // Tìm tất cả các phiên bản bài viết với điều kiện lọc
+            const postVersions = await PostVersion.find(postVersionQuery).lean();
+
+            if (postVersions.length === 0) {
+                console.log('Không tìm thấy phiên bản bài viết nào với điều kiện lọc cụ thể');
+                return [];
+            }
+
+            // Lấy phiên bản mới nhất của mỗi bài viết active và điều kiện lọc cụ thể
+            const latestPosts = await Promise.all(postVersions.map(async (postVersion) => {
+                const latestPost = await this.getLatestPost(postVersion.post_id);
+                return latestPost;
+            }));
+
+            // Lọc ra các bài viết hợp lệ (không null)
+            const filteredPosts = latestPosts.filter(post => post !== null);
+
+            return filteredPosts;
+        } catch (error) {
+            throw new Error('Error retrieving posts by type: ' + error.message);
+        }
+    }
+    
 }
 
 module.exports = PostService;

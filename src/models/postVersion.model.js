@@ -18,12 +18,14 @@ const postVersionSchema = new Schema({
         ref: 'Admin',
         required: true
     },
-    type: {
+    title: {
         type: String,
         required: true
     },
-    title: {
-        type: String,
+    type: {
+        type: [new Schema({
+            paragraph:{ type: String, required:true}
+        })],
         required: true
     },
     abstract: {

@@ -75,6 +75,16 @@ class PostController {
             return res.status(500).json({message:'Internal Sever Error'})
         }
     }
+    static getList = async(req,res) => {
+        try {
+            const filters = req.query; // Sử dụng query parameters
+            const posts = await PostService.getPostList(filters);
+            res.status(200).json(posts);
+        } catch (error) {
+            console.error('Error retrieving posts:', error.message);
+            res.status(500).json({ error: 'Error retrieving posts: ' + error.message });
+        }
+    }
 }
 
 module.exports = PostController;
