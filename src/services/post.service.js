@@ -62,11 +62,13 @@ class PostService {
             const { type,status,title, abstract, image,body, update_by } = updateData;
             const updatedAt = new Date();
             if (status && status !== post.status) {
+                console.log(2222222222222222222222)
                 post.status = status;
                 post.updated_at = updatedAt;
                 await post.save();
                 return post;
             }
+            console.log(111111111111111111)
             post.type = type;
             post.title = title;
             post.abstract = abstract;
