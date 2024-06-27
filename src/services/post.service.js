@@ -101,15 +101,19 @@ class PostService {
         try {
         console.log('Kiểm tra type của bài viết muốn được lấy:',type);
         const activePosts = await Post.find({ status: 'active' }).lean();
-            const activePostIds = activePosts.map(post => post.post_id);
-            console.log(activePostIds)
-            const postVersions = await PostVersion.find({
+        const activePostIds = activePosts.map(post => post.post_id);
+        console.log(activePostIds)
+        if (type === 'all'){
+            const postAll = await PostVersion.find({
                 post_id: { $in: activePostIds },
-                type: 'Education'
-            }).lean();
-            console.log(postVersions)
-
-            
+            })
+            return postAll
+        }
+        const postVersions = await PostVersion.find({
+            post_id: { $in: activePostIds },
+            type: type
+        }).lean();
+        console.log(postVersions)
             return postVersions;
         }catch (error) {
             throw new Error('Error retrieving posts by type: ' + error.message);

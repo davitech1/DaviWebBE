@@ -1,35 +1,37 @@
-const Customer = require('../models/customer.model.js');
-const { networkInterfaces } = require('os');
+'use strict';
 
-const getSystemIp = () => {
-    const nets = networkInterfaces();
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            if (net.family === 'IPv4' && !net.internal) {
-                return net.address;
-            }
+const Customer = require('../models/customer.model.js');
+const moment = require('moment-timezone');
+
+class CustomerService {
+    static async createCustomer(req) {
+        try {
+            const { email, number, name, address, id_post_view } = req.body;
+
+            // Lấy địa chỉ IP của máy khách
+            const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+            const customerData = { email, number, name, address, id_post_view, ip: clientIp };
+            const currentTimeUTCPlus7 = moment.tz("Asia/Bangkok").format();
+            const customer = new Customer({
+                ...customerData,
+                id_post_view: customerData.id_post_view || '1',
+                view_at: currentTimeUTCPlus7
+            });
+            await customer.save();
+            return {
+                email: customer.email,
+                number: customer.number,
+                name: customer.name,
+                address: customer.address,
+                id_post_view: customer.id_post_view,
+                ip: customer.ip,
+                view_at: customer.view_at
+            };
+        } catch (error) {
+            throw new Error('Error creating customer: ' + error.message);
         }
     }
-    return '127.0.0.1';
-};
+}
 
-const createCustomer = async (customerData, req) => {
-    try {
-        const currentTimeVN = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
-        const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        const customer = new Customer({
-            ...customerData,
-            ip: clientIp,
-            id_post_view: customerData.id_post_view || '1',
-            view_at: currentTimeVN
-        });
-        await customer.save();
-        return customer;
-    } catch (error) {
-        throw new Error('Error creating customer: ' + error.message);
-    }
-};
-
-module.exports = {
-    createCustomer,
-};
+module.exports = CustomerService;
