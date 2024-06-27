@@ -19,19 +19,18 @@ class PostService {
             }
 
             const post = new Post({
-                type: type ,
                 status: 'active',
                 version: 1
             });
             await post.save();
-            await PostService.createPostVersion(post, update_by, title, abstract, image,body, createdAt);
+            await PostService.createPostVersion(post,type, update_by, title, abstract, image,body, createdAt);
             return post;
         } catch (error) {
             throw new Error('Error creating post: ' + error.message);
         }
     }
 
-    static createPostVersion = async (post, update_by, title, abstract, image,body, createdAt) => {
+    static createPostVersion = async (post, type, update_by, title, abstract, image,body, createdAt) => {
         try {
             const postVersionData = {
                 post_id: post.post_id, 
@@ -39,6 +38,7 @@ class PostService {
                 status: post.status,
                 title: title,
                 abstract: abstract,  
+                type: type,
                 image: image,
                 body:body,
                 created_at: createdAt,
@@ -78,7 +78,7 @@ class PostService {
             post.version += 1;
             await post.save();
 
-            await PostService.createPostVersion(post, update_by, title, abstract, image, body, updatedAt);
+            await PostService.createPostVersion(post, type, update_by, title, abstract, image, body, updatedAt);
             return post;
         } catch (error) {
             throw new Error('Error updating post: ' + error.message);
@@ -98,7 +98,29 @@ class PostService {
         } catch (error) {
             throw new Error('Error retrieving post: ' + error.message);
         }
-    }    
+    }
+    static getPostList = async( type) =>{
+        try {
+        console.log('Kiểm tra type của bài viết muốn được lấy:',type);
+        const activePosts = await Post.find({ status: 'active' }).lean();
+        const activePostIds = activePosts.map(post => post.post_id);
+        console.log(activePostIds)
+        if (type === 'all'){
+            const postAll = await PostVersion.find({
+                post_id: { $in: activePostIds },
+            })
+            return postAll
+        }
+        const postVersions = await PostVersion.find({
+            post_id: { $in: activePostIds },
+            type: type
+        }).lean();
+        console.log(postVersions)
+            return postVersions;
+        }catch (error) {
+            throw new Error('Error retrieving posts by type: ' + error.message);
+        }
+    }
 }
 
 module.exports = PostService;

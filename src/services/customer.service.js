@@ -1,48 +1,37 @@
-const Customer = require('../models/customer.model.js');
+'use strict';
 
-const getSystemIp = () => {
-    const { networkInterfaces } = require('os');
-    const nets = networkInterfaces();
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            if (net.family === 'IPv4' && !net.internal) {
-                return net.address;
-            }
+const Customer = require('../models/customer.model.js');
+const moment = require('moment-timezone');
+
+class CustomerService {
+    static async createCustomer(req) {
+        try {
+            const { email, number, name, address, id_post_view } = req.body;
+
+            // Lấy địa chỉ IP của máy khách
+            const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+            const customerData = { email, number, name, address, id_post_view, ip: clientIp };
+            const currentTimeUTCPlus7 = moment.tz("Asia/Bangkok").format();
+            const customer = new Customer({
+                ...customerData,
+                id_post_view: customerData.id_post_view || '1',
+                view_at: currentTimeUTCPlus7
+            });
+            await customer.save();
+            return {
+                email: customer.email,
+                number: customer.number,
+                name: customer.name,
+                address: customer.address,
+                id_post_view: customer.id_post_view,
+                ip: customer.ip,
+                view_at: customer.view_at
+            };
+        } catch (error) {
+            throw new Error('Error creating customer: ' + error.message);
         }
     }
-    return '127.0.0.1';ccc
-};
+}
 
-const getcurrentTimeUTCP7 = () => {
-    const currentTime = new Date();
-    currentTime.setHours(currentTime.getHours() + 7);
-    const year = currentTime.getUTCFullYear();
-    const month = String(currentTime.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(currentTime.getUTCDate()).padStart(2, '0');
-    const hours = String(currentTime.getUTCHours()).padStart(2, '0');
-    const minutes = String(currentTime.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(currentTime.getUTCSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-};
-
-const createCustomer = async (customerData) => {
-    try {
-        const currentTimeVN = getcurrentTimeUTCP7();
-        const customer = new Customer({
-            ...customerData,
-            ip: getSystemIp(),
-            id_post_view: customerData.id_post_view || '1',
-            view_at: currentTimeVN
-        });
-        await customer.save();
-        return customer;
-    } catch (error) {
-        throw new Error('Error creating customer: ' + error.message);
-    }
-};
-
-module.exports = {
-    createCustomer,
-    getcurrentTimeUTCP7
-};
+module.exports = CustomerService;

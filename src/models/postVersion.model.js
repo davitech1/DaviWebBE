@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const DOCUMENT_NAME = "PostVersion";
-const COLLECTION_NAME = "post_versions";
+const COLLECTION_NAME = "PostVersion";
 
 // Declare the Schema of the Mongo model
 const postVersionSchema = new Schema({
@@ -16,6 +16,10 @@ const postVersionSchema = new Schema({
     update_by: {
         type: String,
         ref: 'Admin',
+        required: true
+    },
+    type: {
+        type: String,
         required: true
     },
     title: {
@@ -40,9 +44,6 @@ const postVersionSchema = new Schema({
         type: Number,
         required: true
     }
-}, {
-    timestamps: true,
-    collection: COLLECTION_NAME
 });
 
 // Export the model

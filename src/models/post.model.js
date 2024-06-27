@@ -18,10 +18,6 @@ const postSchema = new Schema({
         enum: ['active', 'inactive'],
         default: 'active'
     },
-    type: {
-        type: String,
-        required:true
-    },
     version: {
         type: Number,
         required: true,

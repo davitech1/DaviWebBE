@@ -53,10 +53,26 @@ class PostController {
             }
             const {type,title, abstract, body,image} = latestPost;
             const postData = { type,title, abstract,body, image };
+            console.log(postData.type)
+
             return res.status(200).json(postData);
         } catch(error) {
             console.log('viewPost error: ',error.message);
             return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    static getPostList = async(req,res) => {
+        try {
+            const type =  req.params.type;
+            console.log(type);
+            const postList = await PostService.getPostList(type);
+            if (!postList) {
+                return res.status(404).json({ message: 'Post not found' });
+            }
+            return res.status(200).json(postList)
+        } catch(error) {
+            console.error('error:',error.message);
+            return res.status(500).json({message:'Internal Sever Error'})
         }
     }
 }

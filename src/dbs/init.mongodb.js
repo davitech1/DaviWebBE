@@ -1,31 +1,29 @@
-'use strict'
-
+'use strict';
 const mongoose = require('mongoose');
-const { db:{host, port, name} } = require('../configs/config.mongodb');
+const config = require('../configs/config.mongodb');
+const seedDatabase = require('../models/typeSeeder.model'); // Đảm bảo đường dẫn chính xác đến tệp seeder của bạn
 
-const connectString = `mongodb://${host}:${port}/${name}`;
 class Database {
-    constructor () {
+    constructor() {
         this.connect();
     }
 
-    connect(type = 'mongodb') {
-        mongoose.connect( connectString )
-        .then( _ => {
-            console.log(`Connected MongoDB Success: ${connectString}`);
-        })
-        .catch( err => console.error('Connection error::', err));
-    }
+    connect() {
+        const { host, port, name } = config.db;
+        const mongoURI = `mongodb://${host}:${port}/${name}`;
 
-    static getInstance() {
-        if(!Database.instance) {
-            Database.instance = new Database();
-        };
-
-        return Database.instance;
+        mongoose.connect(mongoURI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        }).then(() => {
+            console.log('Connected to MongoDB');
+            return seedDatabase(); // Gọi seeder khi kết nối thành công
+        }).then(() => {
+            console.log('Database seeded successfully');
+        }).catch(err => {
+            console.error('Failed to connect to MongoDB', err);
+        });
     }
 }
 
-const instanceMongodb = Database.getInstance();
-module.exports = instanceMongodb;
-
+module.exports = new Database();

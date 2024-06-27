@@ -56,7 +56,6 @@ class AccessService {
                 process.env.JWT_SECRET, 
                 { expiresIn: '1h' }
             );
-            newAdmin.status = 'active';
             await newAdmin.save();
 
             return {
