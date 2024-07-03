@@ -1,9 +1,6 @@
 'use strict'
 
-const mongoose = require('mongoose'); // Đảm bảo rằng mongoose được yêu cầu trước
-const AutoIncrement = require('mongoose-sequence')(mongoose);
-
-const { Schema } = mongoose;
+const { model, Schema } = require('mongoose');
 
 const DOCUMENT_NAME = "User";
 const COLLECTION_NAME = "Users";
@@ -36,4 +33,4 @@ const userSchema = new Schema({
 
 
 //Export the model
-module.exports = mongoose.model(DOCUMENT_NAME, userSchema);
+module.exports = model(DOCUMENT_NAME, userSchema);

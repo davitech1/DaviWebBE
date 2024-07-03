@@ -6,7 +6,6 @@ class AccessController {
 
     login = async ( req, res, next) => {
         try {
-            console.log(req.body)
             return res.status(200).json( await AccessService.login( req.body ))
         } catch (error) {
             console.log(error)

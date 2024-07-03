@@ -27,7 +27,7 @@ class AccessService {
 
             return {
                 code: 200,
-                admin: { _id: foundAdmin._id, name: foundAdmin.name },
+                user: { _id: foundAdmin._id, name: foundAdmin.name },
                 token
             };
         } catch (error) {
