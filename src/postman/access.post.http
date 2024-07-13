@@ -1,0 +1,40 @@
+@url_dev = http://localhost:3055/v1/api
+### signup
+
+POST {{url_dev}}/user/signup
+Content-Type: application/json
+x-api-key: edd46669d67a5eb5691f7634e9faa66242d933c43688be28d1e2dc0eca3e4ab7d76cfc4732603ce28a46e796f648952fc7587e5b6b05169bc97ed9c7607acd43
+
+{
+    "name": "Cao Trung",
+    "email": "trung110115@gmail.com",
+    "password": "abc123"
+}
+
+# POST {{url_dev}}/user/login
+# Content-Type: application/json
+# x-api-key: edd46669d67a5eb5691f7634e9faa66242d933c43688be28d1e2dc0eca3e4ab7d76cfc4732603ce28a46e796f648952fc7587e5b6b05169bc97ed9c7607acd43
+
+# {
+#     "email": "trung110113@gmail.com",
+#     "password": "abc123"
+# }
+
+# ### contact
+
+# POST {{url_dev}}/contact
+# Content-Type: application/json
+# x-api-key: edd46669d67a5eb5691f7634e9faa66242d933c43688be28d1e2dc0eca3e4ab7d76cfc4732603ce28a46e796f648952fc7587e5b6b05169bc97ed9c7607acd43
+
+# {
+#     "name": "Cao Trung",
+#     "email": "trung110113@gmail.com",
+#     "phone": "0981641139",
+#     "message": "IT service 2, please"
+# }
+
+# ### notification
+
+# GET {{url_dev}}/notification
+# Content-Type: application/json
+# x-api-key: edd46669d67a5eb5691f7634e9faa66242d933c43688be28d1e2dc0eca3e4ab7d76cfc4732603ce28a46e796f648952fc7587e5b6b05169bc97ed9c7607acd43

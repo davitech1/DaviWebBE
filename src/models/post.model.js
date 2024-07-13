@@ -1,35 +1,43 @@
 'use strict'
 
-const mongoose = require('mongoose');
-const AutoIncrement = require('mongoose-sequence')(mongoose);
-const { Schema } = mongoose;
+const { model, Schema} = require('mongoose');
+const { generateSlug, ensureUniqueSlug } = require('../utils/slugUtils');
+
 
 const DOCUMENT_NAME = "Post";
-const COLLECTION_NAME = "posts";
-
-// Declare the Schema of the Mongo model
+const COLLECTION_NAME = "Posts";
 const postSchema = new Schema({
-    post_id: {
-        type: Number,
-        unique: true
-    },
-    status: {
-        type: String,
-        enum: ['active', 'inactive'],
-        default: 'active'
-    },
-    version: {
-        type: Number,
-        required: true,
-        default: 1
-    }
-}, {
+  title: String,
+  content: String,
+  author: String,
+  type: {
+    type: String,
+    enum: ['news', 'blog', 'product', 'event'],
+    required: true
+  },
+  tags: [String],
+  currentVersion: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PostVersion'
+  },
+  versions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PostVersion'
+  }],
+},
+{
     timestamps: true,
     collection: COLLECTION_NAME
 });
 
-// Apply the auto-increment plugin to the postSchema
-postSchema.plugin(AutoIncrement, { inc_field: 'post_id' });
+postSchema.pre('save', async function(next) {
+    if (this.isModified('title')) {
+      const baseSlug = generateSlug(this.title);
+      this.slug = await ensureUniqueSlug(this.constructor, baseSlug, this._id);
+    }
+    next();
+  });
+  
 
-// Export the model
-module.exports = mongoose.model(DOCUMENT_NAME, postSchema);
+
+module.exports = model(DOCUMENT_NAME, postSchema);

@@ -1,50 +1,34 @@
 'use strict'
 
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const { model, Schema } = require('mongoose');
+const { generateSlug, ensureUniqueSlug } = require('../utils/slugUtils');
 
 const DOCUMENT_NAME = "PostVersion";
-const COLLECTION_NAME = "PostVersion";
+const COLLECTION_NAME = "PostVersions";
 
-// Declare the Schema of the Mongo model
+
 const postVersionSchema = new Schema({
-    post_id: {
-        type: Number,
-        ref: 'Post',
-        required: true
+    post: {
+      type: Schema.Types.ObjectId,
+      ref: 'Post',
+      required: true
     },
-    update_by: {
-        type: String,
-        ref: 'Admin',
-        required: true
-    },
-    type: {
-        type: String,
-        required: true
-    },
-    title: {
-        type: String,
-        required: true
-    },
-    abstract: {
-        type: String
-    },
-    body:{
-        type: String,
-        required: true
-    },
-    image: {
-        type: String
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
-    },
-    version: {
-        type: Number,
-        required: true
-    }
-});
+    title: String,
+    content: String,
+    author: String,
+    versionNumber: Number,
+  },
+  {
+      timestamps: true,
+      collection: COLLECTION_NAME
+  });
 
-// Export the model
-module.exports = mongoose.model(DOCUMENT_NAME, postVersionSchema);
+  postVersionSchema.pre('save', async function(next) {
+    if (this.isModified('title')) {
+      const baseSlug = generateSlug(this.title);
+      this.slug = await ensureUniqueSlug(this.constructor, baseSlug, this._id);
+    }
+    next();
+  });
+  
+  module.exports = model( DOCUMENT_NAME, postVersionSchema);

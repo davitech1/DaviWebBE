@@ -1,25 +1,40 @@
-'use strict';
-const mongoose = require('mongoose');
-const config = require('../configs/config.mongodb');
+'use strict'
 
+const mongoose = require('mongoose');
+const { countConnect } = require('../helpers/check.connect');
+const { db:{host, port, name} } = require('../configs/config.mongodb');
+
+const connectString = `mongodb://${host}:${port}/${name}`;
 class Database {
-    constructor() {
+    constructor () {
         this.connect();
     }
 
-    connect() {
-        const { host, port, name } = config.db;
-        const mongoURI = `mongodb://${host}:${port}/${name}`;
+    connect(type = 'mongodb') {
+        // if(1 === 1){
+        //     mongoose.set('debug', true);
+        //     mongoose.set('debug', {color: true});
+        // };
+        mongoose.connect( connectString, {
+            maxPoolSize : 50 // The maximum number of connections that the connection pool can maintain at one time
+        } ).then( _=>{
+            console.log(`Connected MongoDB Success: ${connectString}`);
+            countConnect();
+        }
+            )
+        .catch( err => console.error('Connection error:', err));
+    }
+    // Trien khai Singleton dam bao chi tao 1 doi tuong duy nhat, chi co 1 ket noi toi dbs
+    static getInstance() {
+        if(!Database.instance) {
+            Database.instance = new Database();
+        };
 
-        mongoose.connect(mongoURI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        }).then(() => {
-            console.log('Database seeded successfully');
-        }).catch(err => {
-            console.error('Failed to connect to MongoDB', err);
-        });
+        return Database.instance;
     }
 }
 
-module.exports = new Database();
+const instanceMongodb = Database.getInstance();
+module.exports = instanceMongodb;
+
+
